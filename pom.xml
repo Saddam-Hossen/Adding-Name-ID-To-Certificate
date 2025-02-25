@@ -19,7 +19,15 @@
             <artifactId>itextpdf</artifactId>
             <version>5.5.13.2</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/com.itextpdf/itext-core -->
 
+
+
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+            <version>5.2.3</version> <!-- Use the latest version -->
+        </dependency>
     </dependencies>
 
 </project>

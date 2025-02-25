@@ -25,7 +25,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
-import static com.universalsentientlife.GeneralMember.getValidFileName;
 
 public class DelegateCardBranchCEM {
     static int count=1;

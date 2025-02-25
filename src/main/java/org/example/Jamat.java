@@ -4,10 +4,7 @@ import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Image;
 import com.itextpdf.text.PageSize;
-import com.itextpdf.text.pdf.PdfContentByte;
-import com.itextpdf.text.pdf.PdfImportedPage;
-import com.itextpdf.text.pdf.PdfReader;
-import com.itextpdf.text.pdf.PdfWriter;
+import com.itextpdf.text.pdf.*;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -24,21 +21,21 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 
-public class BranchPresidentSecretary {
+
+public class Jamat {
+
     static int count=1;
     public static void main(String[] args) throws DocumentException, IOException {
-        deleteAllFilesInFolder("G:\\pdf\\sodossoFinalM");
-        deleteAllFilesInFolder("G:\\pdf\\sodossoFinalBranch");
-        deleteAllFilesInFolder("G:\\pdf\\sodossoFinal");
-        deleteAllFilesInFolder("G:\\pdf\\sodosso");
-        String folderPath = "G:/pdf/sodosso"; // Replace with your folder path
-       // String xlsxFile = "G:\\pdf\\Delegate Card Update.xlsx";// for two
-        String xlsxFile = "G:\\pdf\\Delegate Card - Branch President-Secretary Final.xlsx";// for three
+        deleteAllFilesInFolder("C:\\reactjs\\ics\\pdf\\sodossoFinalM");
+        deleteAllFilesInFolder("C:\\reactjs\\ics\\pdf\\sodossoFinalBranch");
+        deleteAllFilesInFolder("C:\\reactjs\\ics\\pdf\\sodossoFinal");
+        deleteAllFilesInFolder("C:\\reactjs\\ics\\pdf\\sodosso");
+
+        String folderPath = "C:\\reactjs\\ics\\pdf\\sodosso"; // Replace with your folder path
+        // String xlsxFile = "G:\\pdf\\Delegate Card Update.xlsx";// for two
+        String xlsxFile = "C:\\reactjs\\ics\\reserve\\Book1.xlsx";// for three
         File excelFile = new File(xlsxFile);
 
         // Check if the file exists
@@ -70,39 +67,39 @@ public class BranchPresidentSecretary {
             // Skip the header row and iterate over rows
             for (Row row : sheet) {
                 if (row.getRowNum() == 0) {
-                    continue; // Skip the header row
+                   // continue; // Skip the header row
                 }
 
                 // Retrieve the necessary cells
-                Cell idCell = row.getCell(2); // Adjust cell indexes based on your data
-                Cell nameCell = row.getCell(4);// age 3
-                Cell additionalInfoCell = row.getCell(5);// age 3
-               // Cell uniqueIdC= row.getCell(0);
+                Cell idCell = row.getCell(0); // Adjust cell indexes based on your data
+                Cell nameCell = row.getCell(0);// age 3
+                Cell additionalInfoCell = row.getCell(0);// age 3
+                // Cell uniqueIdC= row.getCell(0);
 
                 if (idCell != null && nameCell != null && additionalInfoCell != null && k < 10000) {
                     k++;
-                   //  String uniqueId=uniqueIdC.toString();
+                    //  String uniqueId=uniqueIdC.toString();
                     // Retrieve values as strings
                     String id = idCell.toString();
                     String name = nameCell.toString();
                     String additionalInfo = additionalInfoCell.toString();
 
                     // Paths to images and the output file
-                   // String existingImagePath = "G:\\pdf/banglafont/Delegate2.jpg";// for two
-                    String existingImagePath = "G:\\pdf/banglafont/Delegate Card for Branch President02.jpg";// for three
-                    String outputImagePath = "G:\\pdf/sodossoFinal/" + name + "_" + k + ".jpg";
-                    String outputImg = "G:\\pdf/sodosso/" + k + ".png";
-                    String customFontPath = "G:\\pdf/banglafont/Bornomala-Bold.ttf";
+                    // String existingImagePath = "G:\\pdf/banglafont/Delegate2.jpg";// for two
+                    String existingImagePath = "C:\\reactjs\\ics\\reserve/jamat.jpg";// for three
+                    String outputImagePath = "C:\\reactjs\\ics\\pdf\\sodossoFinal/"+k+"_" + name + ".jpg";
+                    String outputImg = "C:\\reactjs\\ics\\pdf\\sodosso/" + k + ".png";
+                    String customFontPath = "C:\\reactjs\\ics\\reserve/Nuri Sworolipi Unicode.otf";
 
                     // Create and overlay images
-                    String inputImagePath = createImageFromBengaliText(getValidFileName(id), customFontPath, outputImg,"1");
-                    String resultPath = overlayImage(existingImagePath, inputImagePath, 390, 1070, outputImagePath);
+                    /*String inputImagePath = createImageFromBengaliText(getValidFileName(id), customFontPath, outputImg,"1");
+                    String resultPath = overlayImage(existingImagePath, inputImagePath, 100, 300, outputImagePath);//id
+             */
+                   // String inputImagePath = createImageFromBengaliText(additionalInfo, customFontPath, outputImg,"3");
+                   // String resultPath = overlayImage(existingImagePath, inputImagePath, 100, 500, outputImagePath); // branch
 
-                   inputImagePath = createImageFromBengaliText(additionalInfo, customFontPath, outputImg,"2");
-                    resultPath = overlayImage(resultPath, inputImagePath, 390, 1170, outputImagePath);
-
-                    inputImagePath = createImageFromBengaliText(name, customFontPath, outputImg,"2");
-                    resultPath = overlayImage(resultPath, inputImagePath, 390, 1270, outputImagePath);
+                   String inputImagePath = createImageFromBengaliText1(name, customFontPath, outputImg,"2");
+                   String resultPath = overlayImage(existingImagePath, inputImagePath, 380, 100, outputImagePath); // name
 
                     // Output path verification
                     System.out.println("Overlay Image created : ("+k +") "+ resultPath);
@@ -113,12 +110,46 @@ public class BranchPresidentSecretary {
         }
 
         // Combine all images into a PDF
-         generateFinalPdf();
-        generateBranchPdf();
+       // generateFinalPdf();
+       // generateBranchPdf();
+       // generateSinglefilePdf();
+        String imageFolder = "C:\\reactjs\\ics\\pdf\\sodossoFinal"; // Change to your folder path
+        String outputPdf = "C:\\reactjs\\ics\\pdf\\singlePdf/Jamat_SNVN.pdf"; // Output PDF file
+        createPdfFromImages(imageFolder, outputPdf);
 
         // deleteAllFilesInFolder("G:\\pdf/sodossoFinal");
     }
+    public static void createPdfFromImages(String imageFolderPath, String outputPdfPath) throws IOException, DocumentException {
+        File folder = new File(imageFolderPath);
+        File[] imageFiles = folder.listFiles((dir, name) -> name.toLowerCase().matches(".*\\.(jpg|jpeg|png|bmp)"));
 
+        if (imageFiles == null || imageFiles.length == 0) {
+            System.out.println("No images found in the folder!");
+            return;
+        }
+
+        Document document = new Document(PageSize.A4);
+        PdfWriter.getInstance(document, new FileOutputStream(outputPdfPath));
+        document.open();
+
+        for (File imageFile : imageFiles) {
+            Image image = Image.getInstance(imageFile.getAbsolutePath());
+
+            // Scale image to fit within A4 page (leaving margins)
+            float maxWidth = PageSize.A4.getWidth() - 50;
+            float maxHeight = PageSize.A4.getHeight() - 50;
+            image.scaleToFit(maxWidth, maxHeight);
+
+            // Center image on page
+            image.setAlignment(Image.ALIGN_CENTER);
+
+            document.add(image);
+            document.newPage(); // Add a new page for each image
+        }
+
+        document.close();
+        System.out.println("PDF Created Successfully: " + outputPdfPath);
+    }
     // Method to validate and sanitize a file name
     public static String getValidFileName(String name) {
         if (name == null || name.isEmpty()) {
@@ -127,33 +158,33 @@ public class BranchPresidentSecretary {
         // Replace invalid characters with an underscore
         return name.replaceAll("[\\\\/:*?\"<>|]", "_");
     }
-public static void generateBranchPdf() throws DocumentException, IOException {
-    File[] files = getPdfFilesPdf("G:\\pdf/sodossoFinalM");
+    public static void generateBranchPdf() throws DocumentException, IOException {
+        File[] files = getPdfFilesPdf("C:\\reactjs\\ics\\pdf\\sodossoFinalM");
 
-    if (files == null || files.length == 0) {
-        System.out.println("No image files found in the directory2.");
-        return;
+        if (files == null || files.length == 0) {
+            System.out.println("No image files found in the directory2.");
+            return;
+        }
+        Set<String> splitPathSet = new HashSet<>();
+        ArrayList<String> filenames=new ArrayList();
+
+        for (File file : files) {
+            String absolutePath = file.getAbsolutePath();
+            filenames.add(absolutePath);
+
+        }
+        String[] data=new String[filenames.size()];
+        int l=0;
+        for (String item : filenames) {
+            data[l]=item;
+            l++;
+            System.out.println(item);
+        }
+
+        combineFullPdfs(data, "C:\\reactjs\\ics\\pdf\\sodossoFinalBranch/"+"PresidentSecretary.SNVN Ltd.pdf");
+
+
     }
-    Set<String> splitPathSet = new HashSet<>();
-    ArrayList<String> filenames=new ArrayList();
-
-    for (File file : files) {
-        String absolutePath = file.getAbsolutePath();
-        filenames.add(absolutePath);
-
-    }
-    String[] data=new String[filenames.size()];
-    int l=0;
-    for (String item : filenames) {
-        data[l]=item;
-        l++;
-        System.out.println(item);
-    }
-
-    combineFullPdfs(data, "G:\\pdf/sodossoFinalBranch/"+"PresidentSecretary.SNVN Ltd.pdf");
-
-
-}
     public static int countWords(String input) {
         if (input == null) {
             return 0; // Return 0 for null strings
@@ -163,14 +194,14 @@ public static void generateBranchPdf() throws DocumentException, IOException {
     }
     public static void generateFinalPdf() {
         // Fetch all image files from the given folder
-        File[] files = getPdfFiles("G:\\pdf/sodossoFinal");
+        File[] files = getPdfFiles("C:\\reactjs\\ics\\pdf\\sodossoFinal");
 
         if (files == null || files.length == 0) {
             System.out.println("No image files found in the directory.");
             return;
         }
 
-        String outputFolderPath = "G:\\pdf/sodossoFinalM/";
+        String outputFolderPath = "C:\\reactjs\\ics\\pdf\\sodossoFinalM/";
         count=1;
 
         // Process the files in groups of four
@@ -230,8 +261,8 @@ public static void generateBranchPdf() throws DocumentException, IOException {
         }
 
         // Debugging: Image dimensions
-       // System.out.println("Existing image size: " + existingImage.getWidth() + "x" + existingImage.getHeight());
-       // System.out.println("Input image size: " + inputImage.getWidth() + "x" + inputImage.getHeight());
+        // System.out.println("Existing image size: " + existingImage.getWidth() + "x" + existingImage.getHeight());
+        // System.out.println("Input image size: " + inputImage.getWidth() + "x" + inputImage.getHeight());
 
         // Create a new buffered image with the same dimensions as the existing image (with transparency support)
         BufferedImage combinedImage = new BufferedImage(
@@ -264,13 +295,13 @@ public static void generateBranchPdf() throws DocumentException, IOException {
             System.out.println("Directory does not exist: " + outputFile.getParent());
             return null;
         } else {
-           // System.out.println("Output image path: " + outputImagePath);
+            // System.out.println("Output image path: " + outputImagePath);
         }
 
         // Write the resulting image to the output file
         try {
             ImageIO.write(combinedImage, "png", new File(outputImagePath)); // Save as PNG to keep transparency
-           // System.out.println("Image written successfully at: " + outputImagePath);
+            // System.out.println("Image written successfully at: " + outputImagePath);
         } catch (IOException e) {
             System.out.println("Error writing the image: " + e.getMessage());
             return null;
@@ -282,14 +313,16 @@ public static void generateBranchPdf() throws DocumentException, IOException {
 
 
 
+
     // Method to create an image from Bengali text and save it as a PNG
-    public static String createImageFromBengaliText(String bengaliText, String fontPath, String outputImagePath,String color) throws IOException, FontFormatException {
+    public static String createImageFromBengaliText1(String bengaliText, String fontPath, String outputImagePath,String color) throws IOException, FontFormatException {
         // Load the custom font
         Font font = Font.createFont(Font.TRUETYPE_FONT, new FileInputStream(fontPath));
 
 
+
         // Create a BufferedImage for drawing
-        BufferedImage bufferedImage = new BufferedImage(600, 200, BufferedImage.TYPE_INT_ARGB);
+        BufferedImage bufferedImage = new BufferedImage(1400, 200, BufferedImage.TYPE_INT_ARGB);
         Graphics2D graphics2D = bufferedImage.createGraphics();
 
         // Set rendering quality and background color
@@ -299,16 +332,16 @@ public static void generateBranchPdf() throws DocumentException, IOException {
         // Set the text color and font
         if(color.equals("1")){
             // Set custom color using the hexadecimal value
-            Color customGreen = Color.decode("#036D32");
+            Color customGreen = Color.decode("#498B41");
             graphics2D.setColor(customGreen);
-            font = font.deriveFont(50f); // Adjust the font size as needed
+            font = font.deriveFont(80f); // Adjust the font size as needed
             // Set the font style to bold
             font = font.deriveFont(Font.BOLD); // Make the font bold
 
         }
         else{
-            graphics2D.setColor(Color.BLACK);
-            font = font.deriveFont(40f); // Adjust the font size as needed
+            graphics2D.setColor(Color.decode("#498B41"));
+            font = font.deriveFont(80f); // Adjust the font size as needed
         }
 
         graphics2D.setFont(font);
@@ -323,6 +356,12 @@ public static void generateBranchPdf() throws DocumentException, IOException {
 
         // Draw the Bengali text onto the image
         graphics2D.drawString(bengaliText, x, y);
+
+
+
+        Font smallFont = font.deriveFont(Font.PLAIN, 60f);  // Smaller font for second part
+        graphics2D.setFont(smallFont);
+        graphics2D.drawString(" - এর প্রতি", x+textWidth, y);
 
         // Dispose of the graphics context
         graphics2D.dispose();
@@ -466,7 +505,7 @@ public static void generateBranchPdf() throws DocumentException, IOException {
         // Close the document
         document.close();
 
-       // System.out.println("PDF created successfully at: " + outputPdfPath);
+        // System.out.println("PDF created successfully at: " + outputPdfPath);
     }
     // Method that creates a PDF from four given images arranged in a 2x2 grid with a 20px outer margin
     public static void createPdfFromImages1(String[] imagePaths, String outputPdfPath) throws Exception {
@@ -520,6 +559,6 @@ public static void generateBranchPdf() throws DocumentException, IOException {
         // Close the document
         document.close();
 
-       // System.out.println("PDF created successfully at: " + outputPdfPath);
+        // System.out.println("PDF created successfully at: " + outputPdfPath);
     }
 }

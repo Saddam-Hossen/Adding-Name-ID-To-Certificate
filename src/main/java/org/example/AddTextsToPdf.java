@@ -8,19 +8,14 @@ import com.itextpdf.text.pdf.PdfContentByte;
 import com.itextpdf.text.pdf.PdfImportedPage;
 import com.itextpdf.text.pdf.PdfReader;
 import com.itextpdf.text.pdf.PdfWriter;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-
 import javax.imageio.ImageIO;
 import java.awt.*;
+import java.awt.Color;
+import java.awt.Font;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
@@ -28,38 +23,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-
-public class BranchPresidentSecretary {
+public class AddTextsToPdf {
     static int count=1;
-    public static void main(String[] args) throws DocumentException, IOException {
-        deleteAllFilesInFolder("G:\\pdf\\sodossoFinalM");
-        deleteAllFilesInFolder("G:\\pdf\\sodossoFinalBranch");
-        deleteAllFilesInFolder("G:\\pdf\\sodossoFinal");
-        deleteAllFilesInFolder("G:\\pdf\\sodosso");
+    public static void main(String[] args) {
         String folderPath = "G:/pdf/sodosso"; // Replace with your folder path
-       // String xlsxFile = "G:\\pdf\\Delegate Card Update.xlsx";// for two
-        String xlsxFile = "G:\\pdf\\Delegate Card - Branch President-Secretary Final.xlsx";// for three
-        File excelFile = new File(xlsxFile);
-
-        // Check if the file exists
-        if (!excelFile.exists()) {
-            System.out.println("File does not exist at: " + xlsxFile);
-            return;
-        }
-
-        // Get the file size in bytes
-        long fileSizeInBytes = excelFile.length();
-
-        // Convert the file size to kilobytes (KB) and megabytes (MB)
-        double fileSizeInKB = fileSizeInBytes / 1024.0;
-        double fileSizeInMB = fileSizeInKB / 1024.0;
-
-        // Display the file size
-        System.out.println("File Size:");
-        System.out.println("Bytes: " + fileSizeInBytes);
-        System.out.println("Kilobytes: " + String.format("%.2f", fileSizeInKB));
-        System.out.println("Megabytes: " + String.format("%.2f", fileSizeInMB));
-        int k = 1;
+        String xlsxFile = "G:\\pdf\\সদস্য_তালিকা-2024.xlsx";
+        int k = 0;
 
         try (FileInputStream fis = new FileInputStream(new File(xlsxFile));
              Workbook workbook = new XSSFWorkbook(fis)) {
@@ -74,38 +43,36 @@ public class BranchPresidentSecretary {
                 }
 
                 // Retrieve the necessary cells
-                Cell idCell = row.getCell(2); // Adjust cell indexes based on your data
-                Cell nameCell = row.getCell(4);// age 3
-                Cell additionalInfoCell = row.getCell(5);// age 3
-               // Cell uniqueIdC= row.getCell(0);
+                Cell idCell = row.getCell(0); // Adjust cell indexes based on your data
+                Cell nameCell = row.getCell(1);
+                Cell additionalInfoCell = row.getCell(2);
 
-                if (idCell != null && nameCell != null && additionalInfoCell != null && k < 10000) {
+                if (idCell != null && nameCell != null && additionalInfoCell != null && k < 50) {
                     k++;
-                   //  String uniqueId=uniqueIdC.toString();
+
                     // Retrieve values as strings
                     String id = idCell.toString();
                     String name = nameCell.toString();
                     String additionalInfo = additionalInfoCell.toString();
 
                     // Paths to images and the output file
-                   // String existingImagePath = "G:\\pdf/banglafont/Delegate2.jpg";// for two
-                    String existingImagePath = "G:\\pdf/banglafont/Delegate Card for Branch President02.jpg";// for three
-                    String outputImagePath = "G:\\pdf/sodossoFinal/" + name + "_" + k + ".jpg";
-                    String outputImg = "G:\\pdf/sodosso/" + k + ".png";
+                    String existingImagePath = "G:\\pdf/banglafont/শাখার সদস্য-04.jpg";
+                    String outputImagePath = "G:\\pdf/sodossoFinal/" + name + "_" + id + ".jpg";
+                    String outputImg = "G:\\pdf/sodosso/" + id + ".png";
                     String customFontPath = "G:\\pdf/banglafont/Bornomala-Bold.ttf";
 
                     // Create and overlay images
-                    String inputImagePath = createImageFromBengaliText(getValidFileName(id), customFontPath, outputImg,"1");
-                    String resultPath = overlayImage(existingImagePath, inputImagePath, 390, 1070, outputImagePath);
+                    String inputImagePath = createImageFromBengaliText(id, customFontPath, outputImg);
+                    String resultPath = overlayImage(existingImagePath, inputImagePath, countWords(id), 1125, outputImagePath);
 
-                   inputImagePath = createImageFromBengaliText(additionalInfo, customFontPath, outputImg,"2");
-                    resultPath = overlayImage(resultPath, inputImagePath, 390, 1170, outputImagePath);
+                    inputImagePath = createImageFromBengaliText(additionalInfo, customFontPath, outputImg);
+                    resultPath = overlayImage(resultPath, inputImagePath, countWords(additionalInfo), 1220, outputImagePath);
 
-                    inputImagePath = createImageFromBengaliText(name, customFontPath, outputImg,"2");
-                    resultPath = overlayImage(resultPath, inputImagePath, 390, 1270, outputImagePath);
+                    inputImagePath = createImageFromBengaliText(name, customFontPath, outputImg);
+                    resultPath = overlayImage(resultPath, inputImagePath, countWords(name), 1320, outputImagePath);
 
                     // Output path verification
-                    System.out.println("Overlay Image created : ("+k +") "+ resultPath);
+                    System.out.println("Overlay complete. New image saved at: " + resultPath);
                 }
             }
         } catch (IOException | FontFormatException e) {
@@ -118,16 +85,7 @@ public class BranchPresidentSecretary {
 
         // deleteAllFilesInFolder("G:\\pdf/sodossoFinal");
     }
-
-    // Method to validate and sanitize a file name
-    public static String getValidFileName(String name) {
-        if (name == null || name.isEmpty()) {
-            throw new IllegalArgumentException("Input name cannot be null or empty.");
-        }
-        // Replace invalid characters with an underscore
-        return name.replaceAll("[\\\\/:*?\"<>|]", "_");
-    }
-public static void generateBranchPdf() throws DocumentException, IOException {
+public static void generateBranchPdf(){
     File[] files = getPdfFilesPdf("G:\\pdf/sodossoFinalM");
 
     if (files == null || files.length == 0) {
@@ -135,22 +93,66 @@ public static void generateBranchPdf() throws DocumentException, IOException {
         return;
     }
     Set<String> splitPathSet = new HashSet<>();
-    ArrayList<String> filenames=new ArrayList();
 
     for (File file : files) {
         String absolutePath = file.getAbsolutePath();
-        filenames.add(absolutePath);
 
-    }
-    String[] data=new String[filenames.size()];
-    int l=0;
-    for (String item : filenames) {
-        data[l]=item;
-        l++;
-        System.out.println(item);
+        // Split the path by "_"
+        String[] parts = absolutePath.split("_");
+
+        // Add the 0 index part (if exists) to the Set
+        if (parts.length > 0) {
+            splitPathSet.add(parts[0]);
+        }
     }
 
-    combineFullPdfs(data, "G:\\pdf/sodossoFinalBranch/"+"PresidentSecretary.SNVN Ltd.pdf");
+    splitPathSet.forEach(e->{
+        ArrayList<String> filenames=new ArrayList();
+
+        for (File file : files) {
+            String absolutePath = file.getAbsolutePath();
+
+            // Split the path by "_"
+            String[] parts = absolutePath.split("_");
+
+            // Add the 0 index part (if exists) to the Set
+            if (parts.length > 0) {
+                splitPathSet.add(parts[0]);
+                if(e.equals(parts[0])){
+                   filenames.add(absolutePath);
+                }
+            }
+        }
+        String[] data=new String[filenames.size()];
+        int l=0;
+        for (String item : filenames) {
+            data[l]=item;
+            l++;
+            System.out.println(item);
+        }
+        System.out.println(e);
+        try {
+            String outputPdf =e + ".pdf";
+            String regex = "([^\\/\\\\]+)\\.[^\\.]+$"; // Matches everything before the last dot
+
+            Pattern pattern = Pattern.compile(regex);
+            Matcher matcher = pattern.matcher(outputPdf);
+
+            if (matcher.find()) {
+                String fileNameWithExtension = matcher.group(1) + matcher.group(0).substring(matcher.group(1).length());
+                System.out.println("File Name with Extension: " + fileNameWithExtension);
+                combineFullPdfs(data, "G:\\pdf/sodossoFinalBranch/"+fileNameWithExtension);
+            } else {
+                System.out.println("File name extraction failed.");
+            }
+
+        } catch (DocumentException ex) {
+            throw new RuntimeException(ex);
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
+        }
+
+    });
 
 
 }
@@ -159,7 +161,7 @@ public static void generateBranchPdf() throws DocumentException, IOException {
             return 0; // Return 0 for null strings
         }
 
-        return 390; // Use the length() method to count characters
+        return 400; // Use the length() method to count characters
     }
     public static void generateFinalPdf() {
         // Fetch all image files from the given folder
@@ -169,39 +171,67 @@ public static void generateBranchPdf() throws DocumentException, IOException {
             System.out.println("No image files found in the directory.");
             return;
         }
+        // Store split file path parts in a Set
+        Set<String> splitPathSet = new HashSet<>();
 
-        String outputFolderPath = "G:\\pdf/sodossoFinalM/";
-        count=1;
+        for (File file : files) {
+            String absolutePath = file.getAbsolutePath();
 
-        // Process the files in groups of four
-        for (int i = 0; i < files.length; i += 4) {
+            // Split the path by "_"
+            String[] parts = absolutePath.split("_");
 
-
-            String[] imageData = new String[4];
-
-            // Add images to the group
-            for (int j = 0; j < 4; j++) {
-                if (i + j < files.length) {
-                    imageData[j] = files[i + j].getAbsolutePath(); // Use available images
-                } else {
-                    // Repeat images if fewer than 4 are left
-                    imageData[j] = files[files.length - 1].getAbsolutePath();
-                }
-            }
-
-            // Call createPDFWithCombinedImages for the current group of images
-            try {
-                String[] pathParts = files[0].getAbsolutePath().split("\\\\");
-                String filename = pathParts[pathParts.length - 1]; // Get the name part only
-
-                String outputPdfPath = outputFolderPath + filename.split("_")[0]+"_" + (count) + ".pdf";  // Use prefix only as filename
-                createPdfFromImages(imageData, outputPdfPath);
-                //System.out.println("Generated: " + outputPdfPath);
-                count++;
-            } catch (Exception e) {
-                e.printStackTrace();
+            // Add the 0 index part (if exists) to the Set
+            if (parts.length > 0) {
+                splitPathSet.add(parts[0]);
             }
         }
+        String outputFolderPath = "G:\\pdf/sodossoFinalM/";
+        AtomicInteger fileCounter = new AtomicInteger(); // Counter to manage output file names
+        // Example: Using splitPathSet for further file filtering/processing
+        splitPathSet.forEach(prefix -> {
+
+            // Filter files matching the current prefix
+            File[] filteredFiles = filterFilesByPrefix(files, prefix);
+
+            // Process filtered files as needed
+            System.out.println("Files with prefix: " + prefix);
+            for (File filteredFile : filteredFiles) {
+                System.out.println("  - " + filteredFile.getAbsolutePath());
+            }
+
+            count=1;
+
+            // Process the files in groups of four
+            for (int i = 0; i < filteredFiles.length; i += 4) {
+
+
+                String[] imageData = new String[4];
+
+                // Add images to the group
+                for (int j = 0; j < 4; j++) {
+                    if (i + j < filteredFiles.length) {
+                        imageData[j] = filteredFiles[i + j].getAbsolutePath(); // Use available images
+                    } else {
+                        // Repeat images if fewer than 4 are left
+                        imageData[j] = filteredFiles[filteredFiles.length - 1].getAbsolutePath();
+                    }
+                }
+
+                // Call createPDFWithCombinedImages for the current group of images
+                try {
+                    String[] pathParts = filteredFiles[0].getAbsolutePath().split("\\\\");
+                    String filename = pathParts[pathParts.length - 1]; // Get the name part only
+
+                    String outputPdfPath = outputFolderPath + filename.split("_")[0]+"_" + (count) + ".pdf";  // Use prefix only as filename
+                    createPdfFromImages(imageData, outputPdfPath);
+                    System.out.println("Generated: " + outputPdfPath);
+                    count++;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
 
 
     }
@@ -230,8 +260,8 @@ public static void generateBranchPdf() throws DocumentException, IOException {
         }
 
         // Debugging: Image dimensions
-       // System.out.println("Existing image size: " + existingImage.getWidth() + "x" + existingImage.getHeight());
-       // System.out.println("Input image size: " + inputImage.getWidth() + "x" + inputImage.getHeight());
+        System.out.println("Existing image size: " + existingImage.getWidth() + "x" + existingImage.getHeight());
+        System.out.println("Input image size: " + inputImage.getWidth() + "x" + inputImage.getHeight());
 
         // Create a new buffered image with the same dimensions as the existing image (with transparency support)
         BufferedImage combinedImage = new BufferedImage(
@@ -264,13 +294,13 @@ public static void generateBranchPdf() throws DocumentException, IOException {
             System.out.println("Directory does not exist: " + outputFile.getParent());
             return null;
         } else {
-           // System.out.println("Output image path: " + outputImagePath);
+            System.out.println("Output image path: " + outputImagePath);
         }
 
         // Write the resulting image to the output file
         try {
             ImageIO.write(combinedImage, "png", new File(outputImagePath)); // Save as PNG to keep transparency
-           // System.out.println("Image written successfully at: " + outputImagePath);
+            System.out.println("Image written successfully at: " + outputImagePath);
         } catch (IOException e) {
             System.out.println("Error writing the image: " + e.getMessage());
             return null;
@@ -283,10 +313,10 @@ public static void generateBranchPdf() throws DocumentException, IOException {
 
 
     // Method to create an image from Bengali text and save it as a PNG
-    public static String createImageFromBengaliText(String bengaliText, String fontPath, String outputImagePath,String color) throws IOException, FontFormatException {
+    public static String createImageFromBengaliText(String bengaliText, String fontPath, String outputImagePath) throws IOException, FontFormatException {
         // Load the custom font
         Font font = Font.createFont(Font.TRUETYPE_FONT, new FileInputStream(fontPath));
-
+        font = font.deriveFont(50f); // Adjust the font size as needed
 
         // Create a BufferedImage for drawing
         BufferedImage bufferedImage = new BufferedImage(600, 200, BufferedImage.TYPE_INT_ARGB);
@@ -297,20 +327,7 @@ public static void generateBranchPdf() throws DocumentException, IOException {
         graphics2D.setColor(Color.WHITE); // Background color
 
         // Set the text color and font
-        if(color.equals("1")){
-            // Set custom color using the hexadecimal value
-            Color customGreen = Color.decode("#036D32");
-            graphics2D.setColor(customGreen);
-            font = font.deriveFont(50f); // Adjust the font size as needed
-            // Set the font style to bold
-            font = font.deriveFont(Font.BOLD); // Make the font bold
-
-        }
-        else{
-            graphics2D.setColor(Color.BLACK);
-            font = font.deriveFont(40f); // Adjust the font size as needed
-        }
-
+        graphics2D.setColor(Color.BLACK);
         graphics2D.setFont(font);
 
         // Calculate the width and height of the text to center it on the image
@@ -428,19 +445,19 @@ public static void generateBranchPdf() throws DocumentException, IOException {
         document.open();
 
         // Define image size for each image (you can adjust the size here)
-        int imageWidth = 295;   // Width of each image in points
-        int imageHeight = 410;  // Height of each image in points
+        int imageWidth = 255;   // Width of each image in points
+        int imageHeight = 380;  // Height of each image in points
 
         // Define custom gaps for each image in the grid
-        int gap1 = 3; // Gap between image 1 and image 2 (horizontal)
-        int gap2 = 3; // Gap between image 3 and image 4 (horizontal)
-        int gap3 = 5; // Gap between image 1 and image 3 (vertical)
-        int gap4 = 5; // Gap between image 2 and image 4 (vertical)
+        int gap1 = 20; // Gap between image 1 and image 2 (horizontal)
+        int gap2 = 20; // Gap between image 3 and image 4 (horizontal)
+        int gap3 = 20; // Gap between image 1 and image 3 (vertical)
+        int gap4 = 20; // Gap between image 2 and image 4 (vertical)
 
         // Load the images from the provided file paths
-        Image[] pdfImages = new Image[imagePaths.length];
+        com.itextpdf.text.Image[] pdfImages = new com.itextpdf.text.Image[imagePaths.length];
         for (int i = 0; i < imagePaths.length; i++) {
-            pdfImages[i] = Image.getInstance(imagePaths[i]);
+            pdfImages[i] = com.itextpdf.text.Image.getInstance(imagePaths[i]);
             pdfImages[i].scaleToFit(imageWidth, imageHeight);  // Scale the image to the desired size
         }
 
@@ -453,64 +470,10 @@ public static void generateBranchPdf() throws DocumentException, IOException {
         float yOffset = (pageSize.getHeight() - totalHeight) / 2;
 
         // Position of each image with the outer margin and custom gaps
-        pdfImages[0].setAbsolutePosition(xOffset + outerMargin+5, yOffset + outerMargin + imageHeight + gap3+5 );  // Image 1
-        pdfImages[1].setAbsolutePosition(xOffset + outerMargin + imageWidth + gap1+7, yOffset + outerMargin + imageHeight + gap3+5 );  // Image 2
-        pdfImages[2].setAbsolutePosition(xOffset + outerMargin+5, yOffset + outerMargin);  // Image 3
-        pdfImages[3].setAbsolutePosition(xOffset + outerMargin + imageWidth + gap2+7, yOffset + outerMargin);  // Image 4
-
-        // Add the images to the PDF document
-        for (Image img : pdfImages) {
-            document.add(img);
-        }
-
-        // Close the document
-        document.close();
-
-       // System.out.println("PDF created successfully at: " + outputPdfPath);
-    }
-    // Method that creates a PDF from four given images arranged in a 2x2 grid with a 20px outer margin
-    public static void createPdfFromImages1(String[] imagePaths, String outputPdfPath) throws Exception {
-        // A4 page dimensions in points (1 inch = 72 points, A4 = 8.27in x 11.69in)
-        com.itextpdf.text.Rectangle pageSize = new com.itextpdf.text.Rectangle(595, 842);  // A4 size in points
-        float outerMargin = 20f;  // Outer margin around the grid in pixels (20px)
-
-        // Create a new PDF document with A4 dimensions and an outer margin
-        Document document = new Document(pageSize);
-
-        // Create PdfWriter instance to write the document into a file
-        PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(outputPdfPath));
-        document.open();
-
-        // Define image size for each image (you can adjust the size here)
-        int imageWidth = 290;   // Width of each image in points
-        int imageHeight = 420;  // Height of each image in points
-
-        // Define custom gaps for each image in the grid
-        int gap1 = 6; // Gap between image 1 and image 2 (horizontal)
-        int gap2 = 6; // Gap between image 3 and image 4 (horizontal)
-        int gap3 = 5; // Gap between image 1 and image 3 (vertical)
-        int gap4 = 5; // Gap between image 2 and image 4 (vertical)
-
-        // Load the images from the provided file paths
-        Image[] pdfImages = new Image[imagePaths.length];
-        for (int i = 0; i < imagePaths.length; i++) {
-            pdfImages[i] = Image.getInstance(imagePaths[i]);
-            pdfImages[i].scaleToFit(imageWidth, imageHeight);  // Scale the image to the desired size
-        }
-
-        // Calculate the total width and height considering the images, gaps, and outer margin
-        float totalWidth = imageWidth * 2 + gap1 + gap2 + 2 * outerMargin;
-        float totalHeight = imageHeight * 2 + gap3 + gap4 + 2 * outerMargin;
-
-        // Positioning images inside the outer margin, center them on the page
-        float xOffset = (pageSize.getWidth() - totalWidth) / 2;
-        float yOffset = (pageSize.getHeight() - totalHeight) / 2;
-
-        // Position of each image with the outer margin and custom gaps
-        pdfImages[0].setAbsolutePosition(xOffset + outerMargin, yOffset + outerMargin + imageHeight + gap3 );  // Image 1
-        pdfImages[1].setAbsolutePosition(xOffset + outerMargin + imageWidth + gap1, yOffset + outerMargin + imageHeight + gap3 );  // Image 2
+        pdfImages[0].setAbsolutePosition(xOffset + outerMargin, yOffset + outerMargin + imageHeight + gap3 + 25);  // Image 1
+        pdfImages[1].setAbsolutePosition(xOffset + outerMargin + imageWidth + gap1+25, yOffset + outerMargin + imageHeight + gap3 + 25);  // Image 2
         pdfImages[2].setAbsolutePosition(xOffset + outerMargin, yOffset + outerMargin);  // Image 3
-        pdfImages[3].setAbsolutePosition(xOffset + outerMargin + imageWidth + gap2, yOffset + outerMargin);  // Image 4
+        pdfImages[3].setAbsolutePosition(xOffset + outerMargin + imageWidth + gap2+25, yOffset + outerMargin);  // Image 4
 
         // Add the images to the PDF document
         for (Image img : pdfImages) {
@@ -520,6 +483,13 @@ public static void generateBranchPdf() throws DocumentException, IOException {
         // Close the document
         document.close();
 
-       // System.out.println("PDF created successfully at: " + outputPdfPath);
+        System.out.println("PDF created successfully at: " + outputPdfPath);
     }
+
 }
+
+
+
+
+
+
